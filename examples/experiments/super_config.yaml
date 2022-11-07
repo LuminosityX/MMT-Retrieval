@@ -62,6 +62,7 @@ training:
   ## ANCE based losses
   ## Saved hard negatives are re-computed each epoch. Use epoch and steps_per_epoch for fine adjustments
   ## With multiple ANCE-sampled losses, only topk of the first one is in effect because all losses use the same hard negatives.
+  ## 论文中好像没有提到这个采样策略，看起来应该是一个难样本采样策略
     # Train Embedding with Triplet Loss using ANCE-sampled negatives
     - name: flickr30k # Alternative: mscoco, multi30k; selects the training dataset
       batchsize: 16
