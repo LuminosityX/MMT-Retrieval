@@ -1,8 +1,8 @@
 model_path:  YOUR_OUTPUT_PATH
 seed: 123456789
-wandb:
+wandb:  # 一个类似tensorboard的工具
   wandb_project: YOUR_WANDB_PROJECT
-  logging_steps: 10 # EVEN WITHOUT WANDB: log to console after this number of steps
+  logging_steps: 10 # EVEN WITHOUT WANDB: log to console(控制台) after this number of steps
   #wandb_name: test
 use_wandb: True
 data:
