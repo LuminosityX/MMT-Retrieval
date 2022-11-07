@@ -67,7 +67,7 @@ https://www.ukp.tu-darmstadt.de/
 
 https://www.tu-darmstadt.de/
 
->This repository contains experimental software and is published for the sole purpose of giving additional background details on the respective publication.
+>This repository contains experimental software and is published for **the sole purpose of giving additional background details** on the respective publication.
 
 
 ## Installation
@@ -87,7 +87,7 @@ pip install mmt-retrieval
 
 Alternatively, you can also clone the latest version from the [repository](https://github.com/UKPLab/MMT-Retrieval) and install it directly from the source code:
 ````
-pip install -e .
+pip install -e .  # -e what's mean?
 ```` 
 
 **PyTorch with CUDA**
@@ -110,7 +110,7 @@ Alternatively, you can fine-tune your own model, too. See [here](#training) for 
 #### Our Fine-Tuned Image-Text Retrieval Models
 We publish our jointly trained fine-tuned models.
 They can be used both to encode images and text in a multimodal embedding space 
-and to cross-encode pairs for a pairwise similarity.
+and to cross-encode pairs for a pairwise similarity.(交叉编码成对相似性???)
 
 | Model | URL |
 |-------|-----|
@@ -142,7 +142,7 @@ All currently supported models require a pre-processing step
 where we extract the regions of interest (which serve as image input analog to tokens for the language input) from the images using a Faster R-CNN object detection model.
 
 Which detection model is needed, depends on the model that you are using.
-Check out [our guide](documentation/image_features.md) where we have gathered all needed information to get startet.
+Check out [**our guide**](documentation/image_features.md) where we have gathered all needed information to get startet.
 
 If available, we also point to already pre-processed image features that can be downloaded for a quicker start.
 
@@ -186,7 +186,9 @@ feature_folder = "path/to/processed/features"
 # Increase max_workers for more concurrent threads for faster loading with many features
 # Remove select to load the entire folder
 model.image_dict.load_features_folder(feature_folder, max_workers=1, select=image_ids)
+
 ## OR
+
 # Only load the file paths so that features are loaded later just-in-time when there are required.
 # Recommended with restricted memory and/ or a lot of images
 # Remove select to load the entire folder
@@ -201,6 +203,8 @@ image_embeddings = model.encode(images=image_ids, convert_to_numpy=True)
 # Get Pairwise Similarity Matrix (as a tensor)
 similarities = model.encode(sentences=sentences, images=image_ids, output_value="logits", convert_to_tensor=True, cross_product_input=True)
 similarities = similarities[:,-1].reshape(len(image_ids), len(sentences))
+
+# 这就是上面说的交叉编码成对相似性
 ````
 
 
