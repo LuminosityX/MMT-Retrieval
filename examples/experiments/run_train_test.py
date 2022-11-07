@@ -32,12 +32,12 @@ def run(config):
         torch.manual_seed(config["seed"])
         np.random.seed(config["seed"])
         random.seed(config["seed"])
-    model_config = config["model"]
+    model_config = config["model"]        
     model_folder_name = f"{model_config['name']}-{datetime.now().strftime('%Y-%m-%d_%H-%M')}"
-    model_save_path = os.path.join(config["model_path"], model_folder_name)
+    model_save_path = os.path.join(config["model_path"], model_folder_name)   # 这里path是输出path
     os.makedirs(model_save_path, exist_ok=True)
 
-    if config.get("use_wandb", False):
+    if config.get("use_wandb", False):  # 这里get函数，后面的意思不是前面的返回是不是后面的，而是若前面没有指定，则返回后面的
         wandb_config = config["wandb"]
         run = wandb.init(config=config, project=wandb_config.get("wandb_project", "mmt-retrieval"), name=wandb_config.get("wandb_name", model_folder_name), reinit=True)
     logging.info(config)
@@ -45,7 +45,7 @@ def run(config):
         logging.info("### Training ###")
         logging.info("Creating a new model in ", model_save_path)
 
-        model = build_model(model_config)
+        model = build_model(model_config)    # 函数在下面
 
         if config.get("use_wandb", False):
             wandb.watch(model)
@@ -54,10 +54,16 @@ def run(config):
         training_tasks = []
         dataset_callback = None
         for task in train_config["tasks"]:
+            ''' DATA_LOADER = {
+                "flickr30k": get_flickr30k,
+                "mscoco": get_mscoco,
+                "multi30k": get_multi30k,
+                "cc": get_cc,
+                } come from process_data'''
             dataset = DATA_LOADER[task["name"]](get_data(config["data"], task["name"]), "train", task.get("tiny", False), model.image_dict,
-                                                joint=task["loss"]["name"] == "joint", **task.get("data_args", {}))
+                                                joint=task["loss"]["name"] == "joint", **task.get("data_args", {}))      # get_data函数在下面
             sampler, batch_sampler, shuffle, batch_size = get_sampler(task["name"], dataset,
-                                                                      task.get("batchsize", train_config["batchsize"]), **task.get("data_args", {}))
+                                                                      task.get("batchsize", train_config["batchsize"]), **task.get("data_args", {}))  # get_sampler来自于process_data
             dataloader = DataLoader(dataset, shuffle=shuffle, batch_size=batch_size, sampler=sampler, batch_sampler=batch_sampler, num_workers=train_config.get("num_workers", 0))
             if task["loss"]["name"] == "triplet":
                 loss = BatchHardTripletLoss(model=model, margin=task["loss"].get("margin", 0.2))
@@ -66,7 +72,7 @@ def run(config):
                 dataset_callback = add_callback(model, dataset, train_config["dev"]["batchsize"],
                                                 task.get("data_args", {}).get("topk", 32),
                                                 task.get("data_args", {}).get("sim_batchsize", 0),
-                                                train_config.get("num_workers", 0), dataset_callback)
+                                                train_config.get("num_workers", 0), dataset_callback)   # calllback还不是很懂这是啥，第一个task的add_callback函数在下面,这里的dataset_callback是55行定义的None
             elif task["loss"]["name"] == "ntxent":
                 loss = NTXentLossTriplet(model=model, scale=task["loss"].get("scale", 20.0))
             elif task["loss"]["name"] == "joint":
@@ -79,7 +85,7 @@ def run(config):
             training_tasks.append((dataloader, loss))
 
         dev_config = train_config["dev"]
-        dev_evaluator = get_evaluator(config["data"], dev_config, model, "dev")
+        dev_evaluator = get_evaluator(config["data"], dev_config, model, "dev")   # 函数在下面
         optimizer_class = transformers.AdamW
         optimizer_params={"lr": train_config.get("lr", 2e-5), "eps": train_config.get("eps", 1e-6)}
         if dataset_callback is not None:
@@ -131,7 +137,7 @@ def run(config):
             model = build_model(model_config)
         if config.get("use_wandb", False):
             wandb.watch(model)
-        test_evaluator = get_evaluator(config["data"], test_config, model, "test")
+        test_evaluator = get_evaluator(config["data"], test_config, model, "test")   # 感觉只有这里跟上面的do_dev_test有区别
         test_evaluator(model, output_path=model_save_path)
 
     with open(os.path.join(model_save_path, "config.yaml"), "w") as f:
@@ -151,7 +157,7 @@ def add_callback(model, dataset, batchsize, topk, sim_batchsize, num_workers, ca
     return callback
 
 def build_model(model_config):
-    if "legacy" not in model_config["name"]:
+    if "legacy" not in model_config["name"]:  # 'legacy'这里不知道是什么意思，config中都没有这个，意思是遗留的意思
         if "oscar" in model_config["name"]:
             embedding_model = OSCAR(model_config["pretrained_model_path"],
                                     max_seq_length=model_config.get("max_seq_length", 70),
@@ -164,7 +170,7 @@ def build_model(model_config):
             embedding_model = UNITER(model_config["pretrained_model_path"],
                                      max_seq_length=model_config.get("max_seq_length", 70),
                                      max_image_seq_len=model_config.get("max_image_seq_len", 50))
-        if model_config.get("half_layers", False):
+        if model_config.get("half_layers", False):   # 将encoder中的layer层数变为一半
             module_list = torch.nn.ModuleList()
             for i, layer in enumerate(embedding_model.auto_model.encoder.layer):
                 if i % 2 == 0:
@@ -175,13 +181,13 @@ def build_model(model_config):
                                         model_config.get("classifier_type", "linear"),
                                         model_config.get("scaling_factor", 2))
         pooling_model = Pooling(768,
-                                       pooling_mode_mean_tokens=model_config.get("mean", True),
+                                       pooling_mode_mean_tokens=model_config.get("mean", True),         # config都没有
                                        pooling_mode_cls_token=model_config.get("cls", False),
                                        pooling_mode_max_tokens=model_config.get("max", False))
         return MultimodalTransformer(modules=[embedding_model, class_head, pooling_model])
 
     # Legacy models
-    elif "joint" in model_config["name"]:
+    elif "joint" in model_config["name"]:           # 在joint的config中也没有这个name，不知道为什么
         if model_config["name"] == "joint_oscar":
             model = JointOSCAR(model_config["pretrained_model_path"],
                                max_seq_length=model_config.get("max_seq_length", 70),
@@ -224,7 +230,7 @@ def build_model(model_config):
                                        pooling_mode_max_tokens=model_config.get("max", False))
         return MultimodalTransformer(modules=[embedding_model, pooling_model])
 
-def get_data(data_config, name):
+def get_data(data_config, name):   # config["data"], task["name"]
     """
     for backwards compatibility of old configs
     :param data_config:
@@ -236,9 +242,9 @@ def get_data(data_config, name):
     elif name in data_config:
         return data_config[name]
     else:
-        return data_config
+        return data_config   # 感觉前面两个都没有
 
-def get_evaluator(data_config, config, model, split):
+def get_evaluator(data_config, config, model, split):   # config["data"], dev_config, model, "dev"   还没咋看懂
     split_evaluators = []
     for task in config["tasks"]:
         load_split = task.get("overwrite_split", split)
