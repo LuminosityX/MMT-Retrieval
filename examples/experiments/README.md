@@ -56,7 +56,7 @@ Run `python run_train_test.py $config.yaml` with the config file of your choice 
 We list configs in [train_configs](train_configs) which covers the training for our
 embedding model, cross encoder model, and the model jointly trained for both.
 In the configs, you only need to set the paths as described above and decide on your dataset.
-See [the super_config.yaml](super_config.yaml) for all options in one config for more details.
+See [the super_config.yaml](super_config.yaml) for all options in one config for more details. **配置文件的细节**
 
 ### Evaluation
 The results of the evaluation will be saved in .csv files in the output folder.
@@ -67,8 +67,9 @@ embedding model, cross encoder model, and the model jointly trained for both.
 In the configs, you only need to set the paths as described above and decide on your dataset.
 See [the super_config.yaml](super_config.yaml) for all options in one config for more details.
 
+**检索重排方法**
 Run `python run_test_retrieve_rerank.py eval_separate_retrieve_rerank.yaml` to evaluate specifically the retrieve-and-rerank approach with separate 
-embedding and cross-encoder model (with a jointly trained model, you can simply use run_train_test.py).
+embedding and cross-encoder model (with a jointly trained model, you can simply use run_train_test.py)(**联合的模型，即共享参数的，可以只用上面的就实现重排方法**).
 In the configs, you only need to set the paths as described above and decide on your dataset.
 See [the super_config.yaml](super_config.yaml) for all options in one config for more details.
 
