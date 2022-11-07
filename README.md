@@ -4,10 +4,10 @@ This project provides an easy way to use the recent pre-trained multimodal Trans
 like [OSCAR](https://github.com/microsoft/Oscar), [UNITER/ VILLA](https://github.com/zhegan27/VILLA) or [M3P (multilingual!)](https://github.com/microsoft/M3P)
 for image search and more.
 
-The code is primarily written for image-text retrieval.
-Still, many other Vision+Language tasks, beside image-text retrieval, should work out of the box using our code or require just small changes.
+The code is primarily written for **image-text retrieval**.
+Still, many other Vision+Language tasks, beside image-text retrieval, should work **out of the box**(开箱即用) using our code or require just small changes.
 
-There is currently no unified approach for how the visual input is handled and each model uses their own slightly different approach.
+**There is currently no unified approach for how the visual input is handled and each model uses their own slightly different approach.**(视觉输入不统一)
 We provide a common interface for all models and support for multiple feature file formats.
 This greatly simplifies the process of running the models.
 
